@@ -1,0 +1,209 @@
+/* 
+joe asher
+10/27/2021
+Arduinno CNC feedback controller
+
+this code is not yet complete, in fact it has a long long way to go
+*/
+
+
+
+#include <OneWire.h>                  //Libraries for the thermometer
+#include <DallasTemperature.h>
+
+#define ONE_WIRE_BUS 5                //Thermometer set up
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+
+float Celcius=0;
+float Fahrenheit=0;
+
+//-------------------------------------------------//
+//-------------------------------------------------//
+
+#include <SPI.h>                      //Libraries for i2c display
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SH1106.h>
+
+#define OLED_RESET 4                  //Display set up
+Adafruit_SH1106 display(OLED_RESET); 
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+
+#if (SH1106_LCDHEIGHT != 64)
+#error("Height incorrect, please fix Adafruit_SH1106.h!");
+#endif
+
+//-------------------------------------------------//
+//-------------------------------------------------//
+
+const int LEDpin = 19;                    //Setting up analog pin asignments
+const int FANpin = 20;
+const int TPRBpin = 21;
+const int TEMPpin = 22;
+const int SW2pin = 25;
+const int SW1pin = 26;
+
+const int BUZZpin = 5;                    //Setting up digital pin asignments 
+const int FANTACHpin = 9;
+const int OBSWpin = 10;
+
+volatile boolean FAN = false;
+volatile boolean LED = false;
+
+int buttonstate = 0;
+
+//-------------------------------------------------//
+//-------------------------------------------------//
+
+void setup() {
+
+Serial.begin(9600);
+display.begin(SH1106_SWITCHCAPVCC, 0x3C);
+display.clearDisplay();
+
+sensors.begin();
+
+pinMode(OBSWpin, INPUT);
+
+pinMode(BUZZpin, OUTPUT);
+
+
+
+{
+  display.setTextSize(1);
+     display.setTextColor(WHITE);
+      display.setCursor(32,0);
+      display.println("CNC COOLING");
+      
+       display.drawLine(5,8,123,8,WHITE);
+       display.drawCircle(23,30,10,WHITE);
+       display.drawLine(23,40,23,20,WHITE);
+       display.drawLine(24,40,22,20,WHITE);
+       display.drawLine(25,40,21,20,WHITE);
+       display.drawLine(26,40,20,20,WHITE);
+       display.drawLine(27,40,19,20,WHITE);
+       display.drawLine(13,30,33,30,WHITE);
+       display.drawLine(13,31,33,29,WHITE);
+       display.drawLine(13,32,33,28,WHITE);
+       display.drawLine(13,33,33,27,WHITE);
+       display.drawLine(13,34,33,26,WHITE);}
+      display.display();
+
+
+      display.setTextSize(1);
+     display.setTextColor(WHITE);
+      display.setCursor(13,45);
+      display.println("HOLD");
+      display.display();
+
+      display.setTextSize(1);
+     display.setTextColor(WHITE);
+      display.setCursor(87,45);
+      display.println("TAP");
+      display.display();
+
+
+display.drawLine(80,34,113,34,WHITE);
+display.fillTriangle(102, 34,92,27,92,41, WHITE);
+display.drawLine(102,29,106,23,WHITE);
+display.drawLine(97,26,101,20,WHITE);
+display.fillTriangle(101,20,98,20,101,23,WHITE);
+display.fillTriangle(106,23,103,23,106,26,WHITE);
+display.display();
+
+}
+
+void loop() {
+attachInterrupt(digitalPinToInterrupt(OBSWpin), buttonPressed, FALLING);
+//-------------------------------------------------//
+//-------------------------------------------------//
+
+
+//-------------------------------------------------//
+//-------------------------------------------------//
+
+
+                                                                                                  
+
+                   
+
+}
+void fan() {
+    
+  
+      display.clearDisplay();
+       display.drawCircle(23,30,10,WHITE);
+
+       display.drawLine(23,40,23,20,WHITE);
+       display.drawLine(24,40,22,20,WHITE);
+       display.drawLine(25,40,21,20,WHITE);
+       display.drawLine(26,40,20,20,WHITE);
+       display.drawLine(27,40,19,20,WHITE);
+
+       display.drawLine(13,30,33,30,WHITE);
+       display.drawLine(13,31,33,29,WHITE);
+       display.drawLine(13,32,33,28,WHITE);
+       display.drawLine(13,33,33,27,WHITE);
+       display.drawLine(13,34,33,26,WHITE);
+
+           display.setTextSize(1);
+     display.setTextColor(WHITE);
+      display.setCursor(13,45);
+      display.println("HOLD");
+      display.display();
+
+      display.setTextSize(1);
+     display.setTextColor(WHITE);
+      display.setCursor(87,45);
+      display.println("TAP");
+      display.display();
+    
+    
+      display.display();
+      delay(500);
+      display.clearDisplay();
+      display.drawCircle(23,30,10,WHITE);
+
+      display.drawLine(30,23,16,37,WHITE);
+       display.drawLine(31,24,15,36,WHITE);
+       display.drawLine(29,22,17,38,WHITE);
+       
+
+       display.drawLine(16,23,30,37,WHITE);
+       display.drawLine(15,24,31,36,WHITE);
+       display.drawLine(17,22,29,38,WHITE);
+      
+       
+      display.display();
+      delay(500);
+
+
+  
+}
+void led() {
+display.clearDisplay();
+display.drawLine(80,34,113,34,WHITE);
+display.fillTriangle(102, 34,92,27,92,41, WHITE);
+display.drawLine(102,29,106,23,WHITE);
+display.drawLine(97,26,101,20,WHITE);
+display.fillTriangle(101,20,98,20,101,23,WHITE);
+display.fillTriangle(106,23,103,23,106,26,WHITE);
+display.display();
+delay(500);
+display.clearDisplay();
+display.drawLine(80,34,113,34,WHITE);
+display.fillTriangle(102, 34,92,27,92,41, WHITE);
+delay(500);
+}
+void buttonPressed(){
+digitalWrite(BUZZpin, HIGH);
+delay(200);
+digitalWrite(BUZZpin, LOW);
+
+
+}
