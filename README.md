@@ -10,7 +10,7 @@ JAE design and manufacturing 8/31/2021
 
 This board was created in order to control the climate inside an electronics box, as well as designed to act as a user interface to control lights inside the box as well.
 
-The board will take inputs from two different one wire thermometers, one on the board, and the other a probe that can be placed at different locations around the box. These inputs are to be interpreted by the Arduino, and transistors will be controlled based on their resulting values. The trip temperatre that will activate the fan circuit will be 100°F, so when either one of the probes hits this temperature, the FAN pin will go high. If either one of the thermometers is disconnected or not functioning correctly, an error will come up on the display.
+The board will take inputs from two different one wire thermometers, one on the board, and the other a probe that can be placed at different locations around the box. These inputs are to be interpreted by the Arduino, and transistors will be controlled based on their resulting values. The trip temperatre that will activate the fan circuit will be 100°F or somwthing around that3, so when either one of the probes hits this temperature, the FAN pin will go high. If either one of the thermometers is disconnected or not functioning correctly, an error will come up on the display. This could very well change, and I might add a 4 pin fan to contorol via PWM. 
 
 The board will also control the lights in side the electronics box. The user will be able to interface with the board using the single momentary switch and the small i2c display.
 
