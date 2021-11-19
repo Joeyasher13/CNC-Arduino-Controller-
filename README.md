@@ -20,4 +20,3 @@ https://www.amazon.com/gp/product/B083XY92LC/ref=ppx_yo_dt_b_search_asin_title? 
 
 ..........................
 
-Thats all from me, I doubt anyone will ever read this and I probably just wasted 30 minutes to write it, but fuck it!
