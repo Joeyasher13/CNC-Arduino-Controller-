@@ -1,4 +1,4 @@
-# Arduino-Fan-Controller
+# Arduino Fan-Light Controller
 A PCB board designed around an Arduino Nano to control temperature and lights in an enclosed electronics box.
 
 ..........................
