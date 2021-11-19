@@ -1,0 +1,268 @@
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+// The pins for I2C are defined by the Wire-library. 
+// On an arduino UNO:       A4(SDA), A5(SCL)
+// On an arduino MEGA 2560: 20(SDA), 21(SCL)
+// On an arduino LEONARDO:   2(SDA),  3(SCL), ...
+#define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+int fan = false;
+int led = false;
+
+
+const int buttonPin = 7;
+const int buzzPin = 2;
+const int ledPin = A0;
+const int fanPin = A1;
+const int pwmPin = 5;
+int buttonState = 0;
+int lastButtonState = 0; // previous state of the button
+int startPressed = 0;    // the moment the button was pressed
+int endPressed = 0;      // the moment the button was released
+int holdTime = 0;        // how long the button was hold
+int idleTime = 0;        // how long the button was idle
+
+void setup() {
+ Serial.begin(9600);
+ if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+pinMode(buzzPin, OUTPUT);
+pinMode(ledPin, OUTPUT);
+pinMode(fanPin, OUTPUT);
+pinMode(buttonPin, INPUT);
+pinMode(pwmPin, OUTPUT);
+
+       display.clearDisplay();
+       display.display();
+
+       display.drawLine(80,34,113,34,WHITE);
+       display.fillTriangle(102, 34,92,27,92,41, WHITE);
+       display.drawLine(102,29,106,23,WHITE);
+       display.drawLine(97,26,101,20,WHITE);
+       display.fillTriangle(101,20,98,20,101,23,WHITE);
+       display.fillTriangle(106,23,103,23,106,26,WHITE);
+       display.display();
+      
+       display.drawCircle(23,30,10,WHITE);
+
+       display.drawLine(23,40,23,20,WHITE);
+       display.drawLine(24,40,22,20,WHITE);
+       display.drawLine(25,40,21,20,WHITE);
+       display.drawLine(26,40,20,20,WHITE);
+       display.drawLine(27,40,19,20,WHITE);
+
+       display.drawLine(13,30,33,30,WHITE);
+       display.drawLine(13,31,33,29,WHITE);
+       display.drawLine(13,32,33,28,WHITE);
+       display.drawLine(13,33,33,27,WHITE);
+       display.drawLine(13,34,33,26,WHITE);
+       display.display();
+
+       
+       display.setTextSize(1);
+       display.setTextColor(WHITE);
+       display.setCursor(11,45);
+       display.println("HOLD");
+       display.display();
+
+       display.setTextSize(1);
+       display.setTextColor(WHITE);
+       display.setCursor(89,45);
+       display.println("TAP");
+       display.display();
+
+       display.setTextSize(1);
+       display.setTextColor(WHITE);
+       display.setCursor(32,0);
+       display.println("CNC COOLING");
+
+       display.display();
+}
+
+
+
+void updateState(){
+  // the button has been just pressed
+  if (buttonState == LOW) {
+      digitalWrite(buzzPin, HIGH);
+      delay(50);
+      digitalWrite(buzzPin, LOW);
+      startPressed = millis();
+      idleTime = startPressed - endPressed;
+
+  // the button has been just released
+  } else {
+      endPressed = millis();
+      holdTime = endPressed - startPressed;
+
+      if (holdTime >=500 && holdTime <3000) { 
+          if (fan == false){
+            fan = true;
+            Serial.println("fan on");
+            display.setTextSize(1);
+            display.setTextColor(BLACK);
+            display.setCursor(11,45);
+            display.println("HOLD");
+            display.setTextColor(WHITE);
+            display.setCursor(18,45);
+            display.println("ON");
+            display.display();
+            digitalWrite(fanPin, HIGH);
+            analogWrite(pwmPin, 25);  
+           
+            for(int i = 0; i<=5; i++){
+       display.drawCircle(23,30,10,WHITE);
+
+       display.drawLine(23,40,23,20,WHITE);
+       display.drawLine(24,40,22,20,WHITE);
+       display.drawLine(25,40,21,20,WHITE);
+       display.drawLine(26,40,20,20,WHITE);
+       display.drawLine(27,40,19,20,WHITE);
+
+       display.drawLine(13,30,33,30,WHITE);
+       display.drawLine(13,31,33,29,WHITE);
+       display.drawLine(13,32,33,28,WHITE);
+       display.drawLine(13,33,33,27,WHITE);
+       display.drawLine(13,34,33,26,WHITE);
+       display.display();
+       delay(500);
+       
+       display.drawCircle(23,30,10,WHITE);
+
+       display.drawLine(23,40,23,20,BLACK);
+       display.drawLine(24,40,22,20,BLACK);
+       display.drawLine(25,40,21,20,BLACK);
+       display.drawLine(26,40,20,20,BLACK);
+       display.drawLine(27,40,19,20,BLACK);
+
+       display.drawLine(13,30,33,30,BLACK);
+       display.drawLine(13,31,33,29,BLACK);
+       display.drawLine(13,32,33,28,BLACK);
+       display.drawLine(13,33,33,27,BLACK);
+       display.drawLine(13,34,33,26,BLACK);
+
+       display.drawCircle(23,30,10,WHITE);
+
+       display.drawLine(30,23,16,37,WHITE);
+       display.drawLine(31,24,15,36,WHITE);
+       display.drawLine(29,22,17,38,WHITE);
+       
+
+       display.drawLine(16,23,30,37,WHITE);
+       display.drawLine(15,24,31,36,WHITE);
+       display.drawLine(17,22,29,38,WHITE);
+      
+       
+       display.display();
+       delay(500);
+ 
+       display.drawLine(30,23,16,37,BLACK);
+       display.drawLine(31,24,15,36,BLACK);
+       display.drawLine(29,22,17,38,BLACK);
+       
+
+       display.drawLine(16,23,30,37,BLACK);
+       display.drawLine(15,24,31,36,BLACK);
+       display.drawLine(17,22,29,38,BLACK);
+       
+       display.drawCircle(23,30,10,WHITE);
+
+       display.drawLine(23,40,23,20,WHITE);
+       display.drawLine(24,40,22,20,WHITE);
+       display.drawLine(25,40,21,20,WHITE);
+       display.drawLine(26,40,20,20,WHITE);
+       display.drawLine(27,40,19,20,WHITE);
+
+       display.drawLine(13,30,33,30,WHITE);
+       display.drawLine(13,31,33,29,WHITE);
+       display.drawLine(13,32,33,28,WHITE);
+       display.drawLine(13,33,33,27,WHITE);
+       display.drawLine(13,34,33,26,WHITE);
+       display.display();
+            }
+          }
+         else if(fan == true){
+            fan = false;
+            Serial.println("fan off");
+            display.setTextSize(1);
+            display.setTextColor(BLACK);
+            display.setCursor(18,45);
+            display.println("ON");
+            display.setTextColor(WHITE);
+            display.setCursor(11,45);
+            display.println("HOLD");
+            display.display();
+            digitalWrite(fanPin, LOW);
+            analogWrite(pwmPin, 0);  
+          }
+      }
+
+      if (holdTime >=45 && holdTime <500) {
+           if (led == false){
+            led = true;
+            Serial.println("led on");
+            display.setTextSize(1);
+            display.setTextColor(BLACK);
+            display.setCursor(89,45);
+            display.println("TAP");
+            display.setTextColor(WHITE);
+            display.setCursor(91,45);
+            display.println("ON");
+            display.display();
+            digitalWrite(ledPin, HIGH);
+                for(int i = 0; i<=5; i++){
+      display.drawLine(80,34,113,34,WHITE);
+      display.fillTriangle(102, 34,92,27,92,41, WHITE);
+      display.drawLine(102,29,106,23,WHITE);
+      display.drawLine(97,26,101,20,WHITE);
+      display.fillTriangle(101,20,98,20,101,23,WHITE);
+      display.fillTriangle(106,23,103,23,106,26,WHITE);
+      display.display();
+      delay(350);
+      display.drawLine(102,29,106,23,BLACK);
+      display.drawLine(97,26,101,20,BLACK);
+      display.fillTriangle(101,20,98,20,101,23,BLACK);
+      display.fillTriangle(106,23,103,23,106,26,BLACK);
+      display.display();
+      delay(350);
+  }
+          }
+          else if(led == true){
+            led = false;
+            Serial.println("led off");
+            display.setTextColor(BLACK);
+            display.setCursor(91,45);
+            display.println("ON");
+            display.setTextSize(1);
+            display.setTextColor(WHITE);
+            display.setCursor(89,45);
+            display.println("TAP");
+            display.display();
+            digitalWrite(ledPin, LOW);
+          }
+      }
+
+}
+}
+
+void loop(){
+  buttonState = digitalRead(buttonPin); // read the button input
+
+  if (buttonState != lastButtonState) { // button state changed
+     updateState();
+  }
+
+  lastButtonState = buttonState;        // save state for next loop
+
+  }
